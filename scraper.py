@@ -4,16 +4,16 @@ import time
 import pandas as pd
 import re
 from selenium import webdriver
-from selenium.webdriver.edge.options import Options as EdgeOptions
-from selenium.webdriver.edge.service import Service as EdgeService
+from selenium.webdriver.chrome.options import Options as ChromeOptions
+from selenium.webdriver.chrome.service import Service as ChromeService
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from webdriver_manager.microsoft import EdgeChromiumDriverManager
+from webdriver_manager.chrome import ChromeDriverManager
 from dotenv import load_dotenv
 import os
-load_dotenv()
+load_dotenv()   
 
 LINKEDIN_EMAIL = os.getenv("LINKEDIN_EMAIL")
 LINKEDIN_PASSWORD = os.getenv("LINKEDIN_PASSWORD")
@@ -25,24 +25,22 @@ LINKEDIN_PASSWORD = os.getenv("LINKEDIN_PASSWORD")
 COMPANY_LINKEDIN_URL = "https://www.linkedin.com/company/ini8-labs/"
 
 def get_driver():
-    #user_data_dir = r"C:\Users\hp\AppData\Local\Microsoft\Edge\User Data"
-   # profile_dir = "Default"  # or use "Profile 1" or any named profile
-    options = EdgeOptions()
-    #options.add_argument(f"--user-data-dir={user_data_dir}")
-    #options.add_argument(f"--profile-directory={profile_dir}")
-    options.add_argument("--start-maximized")
+    options = ChromeOptions()
+    options.add_argument("--headless")
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--disable-blink-features=AutomationControlled")
     options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64)")
     options.add_argument("--ignore-certificate-errors")
-    options.add_experimental_option("excludeSwitches", ["enable-automation"])
-    options.add_experimental_option('useAutomationExtension', False)
 
-    service = EdgeService(EdgeChromiumDriverManager().install())
-    driver = webdriver.Edge(service=service, options=options)
-
+    service = ChromeService(ChromeDriverManager().install())
+    driver = webdriver.Chrome(service=service, options=options)
+    
+    # Make selenium less detectable
     driver.execute_cdp_cmd("Page.addScriptToEvaluateOnNewDocument", {
         "source": "Object.defineProperty(navigator, 'webdriver', {get: () => undefined})"
     })
+    
     return driver
 
 def linkedin_login(driver):
